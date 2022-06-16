@@ -1,0 +1,8 @@
+# Dr. Madt (nRF52840) board configuration
+
+# Copyright (c) Caspar Friedrich <c.s.w.friedrich@gmail.com>
+# SPDX-License-Identifier: Apache-2.0
+
+config BOARD_DR_MADT_NRF52840
+	bool "Dr. Madt (nRF52840)"
+	depends on SOC_NRF52840_QIAA
