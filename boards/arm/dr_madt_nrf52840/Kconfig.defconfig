@@ -1,0 +1,14 @@
+# Dr. Madt (nRF52840) board configuration
+
+# Copyright (c) Caspar Friedrich <c.s.w.friedrich@gmail.com>
+# SPDX-License-Identifier: Apache-2.0
+
+if BOARD_DR_MADT_NRF52840
+
+config BOARD
+	default "dr_madt_nrf52840"
+
+config BT_CTLR
+	default BT
+
+endif # BOARD_DR_MADT_NRF52840
