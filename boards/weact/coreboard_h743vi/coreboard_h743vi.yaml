@@ -1,0 +1,18 @@
+identifier: coreboard_h743vi
+name: WeAct Studio CoreBoard STM32H743VIT6
+type: mcu
+arch: arm
+toolchain:
+  - zephyr
+  - gnuarmemb
+  - xtools
+supported:
+  - uart
+  - gpio
+  - counter
+  - i2c
+  - pwm
+  - adc
+  - spi
+  - usb_device
+  - can
