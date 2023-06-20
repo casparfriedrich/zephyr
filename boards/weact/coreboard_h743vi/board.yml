@@ -1,0 +1,5 @@
+board:
+  name: coreboard_h743vi
+  vendor: weact
+  socs:
+    - name: stm32h743xx

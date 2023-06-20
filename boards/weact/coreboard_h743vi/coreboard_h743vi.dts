@@ -1,0 +1,238 @@
+/*
+ * Copyright (c) 2023 Caspar Friedrich <c.s.w.friedrich@gmail.com>
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/dts-v1/;
+
+#include <st/h7/stm32h743Xi.dtsi>
+#include <st/h7/stm32h743vitx-pinctrl.dtsi>
+
+/ {
+	model = "WeAct Studio CoreBoard STM32H743VIT6";
+	compatible = "weact,coreboard-h743vi";
+
+	chosen {
+		zephyr,code-partition = &slot0_partition;
+		zephyr,console = &usart2;
+		zephyr,display = &display0;
+		zephyr,dtcm = &dtcm;
+		zephyr,flash = &flash0;
+		zephyr,shell-uart = &usart2;
+		zephyr,sram = &sram0;
+		zephyr,uart-mcumgr = &usart2;
+	};
+
+	gpio_keys {
+		compatible = "gpio-keys";
+
+		key_k1: key_k1 {
+			gpios = <&gpioc 13 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>;
+		};
+	};
+
+	gpio_leds {
+		compatible = "gpio-leds";
+
+		led_e3: led_e3 {
+			gpios = <&gpioe 3 GPIO_ACTIVE_HIGH>;
+		};
+	};
+
+	lcd_backlight_en: lcd_backlight_en {
+		compatible = "regulator-fixed";
+		regulator-name = "lcd_backlight_enable";
+		enable-gpios = <&gpioe 10 GPIO_ACTIVE_LOW>;
+	};
+
+	aliases {
+		led0 = &led_e3;
+		sw0 = &key_k1;
+		mcuboot-led0 = &led_e3;
+		mcuboot-button0 = &key_k1;
+		spi-flash0 = &spi_flash0;
+		die-temp0 = &die_temp;
+	};
+};
+
+&clk_hse {
+	clock-frequency = <DT_FREQ_M(25)>;
+	status = "okay";
+};
+
+&clk_lse {
+	status = "okay";
+};
+
+&pll {
+	clocks = <&clk_hse>;
+	div-m = <5>;
+	mul-n = <192>;
+	div-p = <2>; /* 480 MHz -> SYSCLK */
+	div-q = <8>; /* 120 MHz -> RNG, SDMMC1/2, SPI1/2/3 */
+	div-r = <2>; /* 480 MHz */
+	status = "okay";
+};
+
+&pll3 {
+	clocks = <&clk_hse>;
+	div-m = <5>;
+	mul-n = <192>;
+	div-p = <2>;  /* 480 MHz */
+	div-q = <20>; /*  48 MHz -> USB */
+	div-r = <2>;  /* 480 MHz */
+	status = "okay";
+};
+
+&rcc {
+	clocks = <&pll>;
+	clock-frequency = <DT_FREQ_M(480)>;
+	d1cpre  = <1>; /* 480 MHz -> CPU Clock, Systick */
+	hpre    = <2>; /* 240 MHz (HCLK3) -> QUADSPI */
+	d1ppre  = <2>; /* 120 MHz (PCLK3) */
+	d2ppre1 = <2>; /* 120 MHz (PCLK1) -> I2C1/2/3, USART2/3/4/5/7/8 */
+	d2ppre2 = <2>; /* 120 MHz (PCLK2) -> SPI4/5, USART1/6 */
+	d3ppre  = <2>; /* 120 MHz (PCLK4) */
+	status = "okay";
+};
+
+&rng {
+	clocks = <&rcc STM32_CLOCK_BUS_AHB2 0x00000040>,
+	         <&rcc STM32_SRC_PLL1_Q RNG_SEL(1)>;
+	status = "okay";
+};
+
+&rtc {
+	clocks = <&rcc STM32_CLOCK_BUS_APB4 0x00010000>,
+	         <&rcc STM32_SRC_LSE RTC_SEL(1)>;
+	status = "okay";
+};
+
+&quadspi {
+	pinctrl-0 = <&quadspi_bk1_io3_pd13 &quadspi_bk1_io2_pe2 &quadspi_bk1_io1_pd12
+	             &quadspi_bk1_io0_pd11 &quadspi_clk_pb2 &quadspi_bk1_ncs_pb6>;
+	pinctrl-names = "default";
+	status = "okay";
+
+	spi_flash0: w25q64jv@0 {
+		compatible = "st,stm32-qspi-nor";
+		reg = <0x0>;
+		jedec-id = [ef 40 17];
+		size = <DT_SIZE_M(64)>;
+		qspi-max-frequency = <DT_FREQ_M(50)>;
+	};
+};
+
+&usart2 {
+	pinctrl-0 = <&usart2_tx_pa2 &usart2_rx_pa3>;
+	pinctrl-names = "default";
+	current-speed = <115200>;
+	status = "okay";
+};
+
+&i2c1 {
+	pinctrl-0 = <&i2c1_scl_pb8 &i2c1_sda_pb9>;
+	pinctrl-names = "default";
+	status = "okay";
+
+	camera0: ov7725@21 {
+		compatible = "ovti,ov7725";
+		reg = <0x21>;
+		status = "disabled";
+	};
+};
+
+&spi1 {
+	pinctrl-0 = <&spi1_miso_pb4 &spi1_mosi_pd7 &spi1_sck_pb3>;
+	pinctrl-names = "default";
+	cs-gpios = <&gpiod 6 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+	status = "okay";
+
+	spi_flash1: w25q64jv@0 {
+		compatible ="jedec,spi-nor";
+		reg = <0x0>;
+		jedec-id = [ef 40 17];
+		size = <DT_SIZE_M(64)>;
+		spi-max-frequency = <DT_FREQ_M(50)>;
+	};
+};
+
+&spi4 {
+	pinctrl-0 = <&spi4_mosi_pe14 &spi4_sck_pe12 &spi4_nss_pe11>;
+	pinctrl-names = "default";
+	status = "okay";
+
+	display0: st7735@0 {
+		compatible = "sitronix,st7735r";
+		reg = <0x0>;
+		spi-max-frequency = <DT_FREQ_M(15)>;
+		cmd-data-gpios = <&gpioe 13 GPIO_ACTIVE_LOW>;
+		width = <160>;
+		height = <80>;
+		x-offset = <1>;
+		y-offset = <26>;
+		madctl = <120>;
+		colmod = <5>;
+		pwctr1 = [62 02 04];
+		pwctr2 = [C0];
+		pwctr3 = [0D 00];
+		pwctr4 = [8D 6A];
+		pwctr5 = [8D EE];
+		gamctrp1 = [10 0E 02 03 0E 07 02 07 0A 12 27 37 00 0D 0E 10];
+		gamctrn1 = [10 0E 03 03 0F 06 02 08 0A 13 26 36 00 0D 0E 10];
+		frmctr1 = [05 3A 3A];
+		frmctr2 = [05 3A 3A];
+		frmctr3 = [05 3A 3A 05 3A 3A];
+		caset = [00 01 00 a0];
+		raset = [00 1a 00 69];
+		vmctr1 = <14>;
+		invctr = <3>;
+		inversion-on;
+		rgb-is-inverted;
+	};
+};
+
+&sdmmc1 {
+	pinctrl-0 = <&sdmmc1_d0_pc8 &sdmmc1_d1_pc9 &sdmmc1_d2_pc10
+	             &sdmmc1_d3_pc11 &sdmmc1_ck_pc12 &sdmmc1_cmd_pd2>;
+	pinctrl-names = "default";
+	status = "okay";
+};
+
+zephyr_udc0: &usbotg_fs {
+	clocks = <&rcc STM32_CLOCK_BUS_AHB1 0x08000000>,
+	         <&rcc STM32_SRC_PLL3_Q USB_SEL(2)>;
+	pinctrl-0 = <&usb_otg_fs_dm_pa11 &usb_otg_fs_dp_pa12>;
+	pinctrl-names = "default";
+	status = "okay";
+};
+
+&flash0 {
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		boot_partition: partition@0 {
+			label = "mcuboot";
+			reg = <0x00000000 DT_SIZE_K(64)>;
+			read-only;
+		};
+
+		slot0_partition: partition@10000 {
+			label = "image-0";
+			reg = <0x00010000 DT_SIZE_K(960)>;
+		};
+
+		slot1_partition: partition@100000 {
+			label = "image-1";
+			reg = <0x00100000 DT_SIZE_K(960)>;
+		};
+
+		storage_partition: partition@1f0000 {
+			label = "storage";
+			reg = <0x001f0000 DT_SIZE_K(64)>;
+		};
+	};
+};
