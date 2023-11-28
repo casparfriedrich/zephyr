@@ -1,0 +1,19 @@
+identifier: coreboard_f405rg
+name: WeAct Studio STM32F405 64-Pin CoreBoard
+type: mcu
+arch: arm
+toolchain:
+  - zephyr
+  - gnuarmemb
+  - xtools
+supported:
+  - adc
+  - can
+  - counter
+  - gpio
+  - i2c
+  - pwm
+  - spi
+  - uart
+  - usb_device
+vendor: weact
