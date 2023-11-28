@@ -1,0 +1,152 @@
+/*
+ * Copyright (c) 2023 Caspar Friedrich <c.s.w.friedrich@gmail.com>
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/dts-v1/;
+
+#include <st/f4/stm32f405Xg.dtsi>
+#include <st/f4/stm32f405rgtx-pinctrl.dtsi>
+#include <zephyr/dt-bindings/input/input-event-codes.h>
+
+/ {
+	model = "WeAct Studio STM32F405 64-Pin CoreBoard";
+	compatible = "weact,coreboard-f405rg";
+
+	chosen {
+		zephyr,ccm = &ccm0;
+		zephyr,code-partition = &slot0_partition;
+		zephyr,console = &usart1;
+		zephyr,flash = &flash0;
+		zephyr,shell-uart = &usart1;
+		zephyr,sram = &sram0;
+		zephyr,uart-mcumgr = &usart1;
+	};
+
+	keys {
+		compatible = "gpio-keys";
+
+		key_c13: key_c13 {
+			gpios = <&gpioc 13 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>;
+			label = "C13";
+			zephyr,code = <INPUT_KEY_0>;
+		};
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		led_b2: led_b2 {
+			gpios = <&gpiob 2 GPIO_ACTIVE_HIGH>;
+			label = "B2";
+		};
+	};
+
+	aliases {
+		led0 = &led_b2;
+		sw0 = &key_c13;
+		mcuboot-led0 = &led_b2;
+		mcuboot-button0 = &key_c13;
+	};
+};
+
+&clk_lsi {
+	status = "okay";
+};
+
+&clk_hse {
+	clock-frequency = <DT_FREQ_M(8)>;
+	status = "okay";
+};
+
+&pll {
+	div-m = <4>;
+	mul-n = <168>;
+	div-p = <2>;
+	div-q = <7>;
+	clocks = <&clk_hse>;
+	status = "okay";
+};
+
+&rcc {
+	clocks = <&pll>;
+	clock-frequency = <DT_FREQ_M(168)>;
+	ahb-prescaler = <1>;
+	apb1-prescaler = <4>;
+	apb2-prescaler = <2>;
+	status = "okay";
+};
+
+&rng {
+	status = "okay";
+};
+
+&rtc {
+	status = "okay";
+};
+
+&i2c2 {
+	pinctrl-0 = <&i2c2_sda_pb11 &i2c2_scl_pb10>;
+	pinctrl-names = "default";
+	status = "okay";
+};
+
+&spi1 {
+	pinctrl-0 = <&spi1_mosi_pa7 &spi1_miso_pa6 &spi1_sck_pa5 &spi1_nss_pa4>;
+	pinctrl-names = "default";
+	status = "okay";
+};
+
+&usart1 {
+	pinctrl-0 = <&usart1_rx_pa10 &usart1_tx_pa9>;
+	pinctrl-names = "default";
+	status = "okay";
+};
+
+&usart2 {
+	pinctrl-0 = <&usart2_rx_pa3 &usart2_tx_pa2 &usart2_rts_pa1 &usart2_cts_pa0>;
+	pinctrl-names = "default";
+	status = "okay";
+};
+
+&sdmmc1 {
+	pinctrl-0 = <&sdio_d0_pc8 &sdio_d1_pc9 &sdio_d2_pc10
+	             &sdio_d3_pc11 &sdio_ck_pc12 &sdio_cmd_pd2>;
+	pinctrl-names = "default";
+	status = "disabled";
+};
+
+zephyr_udc0: &usbotg_fs {
+	pinctrl-0 = <&usb_otg_fs_dm_pa11 &usb_otg_fs_dp_pa12>;
+	pinctrl-names = "default";
+};
+
+&flash0 {
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		boot_partition: partition@0 {
+			reg = <0x00000000 DT_SIZE_K(48)>;
+			label = "mcuboot";
+			read-only;
+		};
+
+		slot0_partition: partition@c000 {
+			reg = <0x0000c000 DT_SIZE_K(480)>;
+			label = "image-0";
+		};
+
+		slot1_partition: partition@84000 {
+			reg = <0x00084000 DT_SIZE_K(480)>;
+			label = "image-1";
+		};
+
+		storage_partition: partition@fc0000 {
+			reg = <0x00fc0000 DT_SIZE_K(16)>;
+			label = "storage";
+		};
+	};
+};
