@@ -1,0 +1,23 @@
+description: |
+  NXP SC16IS7XX, I2C/SPI to UART interface (I/O control node)
+
+  Note: This is inverted becaus the upper GPIOs ([7:4]) are assosiated with
+        UART-channel A and the lower ones ([3:0]) with channel B.
+
+compatible: "nxp,sc16is7xx-gpio"
+
+include: [base.yaml, gpio-controller.yaml]
+
+on-bus: sc16is7xx
+
+properties:
+  ngpios:
+    required: true
+    const: 8
+
+  "#gpio-cells":
+    const: 2
+
+gpio-cells:
+  - pin
+  - flags
