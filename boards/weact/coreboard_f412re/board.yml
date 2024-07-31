@@ -1,0 +1,5 @@
+board:
+  name: coreboard_f412re
+  vendor: weact
+  socs:
+    - name: stm32f412rx

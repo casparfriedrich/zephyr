@@ -1,0 +1,19 @@
+identifier: coreboard_f412re
+name: WeAct Studio STM32F412 64-Pin CoreBoard
+type: mcu
+arch: arm
+toolchain:
+  - zephyr
+  - gnuarmemb
+  - xtools
+supported:
+  - adc
+  - can
+  - counter
+  - gpio
+  - i2c
+  - pwm
+  - spi
+  - uart
+  - usb_device
+vendor: weact
