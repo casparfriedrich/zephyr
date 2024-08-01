@@ -1,0 +1,26 @@
+description: |
+  NXP SC16IS7XX, I2C/SPI to UART interface (common options)
+
+bus: sc16is7xx
+
+properties:
+  clock-frequency:
+    type: int
+    required: true
+    description: Clock frequency in Hz
+
+  irq-gpios:
+    type: phandle-array
+    required: false
+    description: tbd
+
+  reset-gpios:
+    type: phandle-array
+    required: false
+    description: tbd
+
+  use-software-reset:
+    type: boolean
+    required: false
+    description: |
+      Use software reset instead of a gpio. Only available on SC16IS75x/SC16IS76x.
