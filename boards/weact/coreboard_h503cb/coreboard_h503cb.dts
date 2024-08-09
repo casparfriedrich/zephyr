@@ -1,0 +1,104 @@
+/*
+ * Copyright (c) 2023 Caspar Friedrich <c.s.w.friedrich@gmail.com>
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/dts-v1/;
+
+#include <st/h5/stm32h503Xb.dtsi>
+#include <st/h5/stm32h503cbux-pinctrl.dtsi>
+
+/ {
+	model = "WeAct Studio STM32H503Cx Core Board";
+	compatible = "weact,coreboard-h503cb";
+
+	chosen {
+		zephyr,console = &lpuart1;
+		zephyr,shell-uart = &lpuart1;
+		zephyr,sram = &sram0;
+		zephyr,flash = &flash0;
+	};
+
+	keys {
+		compatible = "gpio-keys";
+
+		key_a0: key_a0 {
+			gpios = <&gpioa 0 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>;
+			label = "A0";
+		};
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		led_c13: led_c13 {
+			gpios = <&gpioc 13 GPIO_ACTIVE_HIGH>;
+			label = "C13";
+		};
+	};
+
+	aliases {
+		led0 = &led_c13;
+		sw0 = &key_a0;
+	};
+};
+
+&clk_hse {
+	clock-frequency = <DT_FREQ_M(8)>;
+	status = "okay";
+};
+
+&clk_hsi48 {
+	status = "okay";
+};
+
+&clk_lse {
+	status = "okay";
+};
+
+&pll {
+	div-m = <4>;
+	mul-n = <250>;
+	div-p = <2>;
+	div-q = <2>;
+	div-r = <2>;
+	clocks = <&clk_hse>;
+	status = "okay";
+};
+
+&rcc {
+	clocks = <&pll>;
+	clock-frequency = <DT_FREQ_M(250)>;
+	ahb-prescaler = <1>;
+	apb1-prescaler = <1>;
+	apb2-prescaler = <1>;
+	apb3-prescaler = <1>;
+	status = "okay";
+};
+
+&rng {
+	status = "okay";
+};
+
+&rtc {
+	status = "okay";
+};
+
+&lpuart1 {
+	pinctrl-0 = <&lpuart1_rx_pa10 &lpuart1_tx_pa9>;
+	pinctrl-names = "default";
+	status = "okay";
+};
+
+// &usart1 {
+// 	pinctrl-0 = <&usart1_rx_pa10 &usart1_tx_pa9>;
+// 	pinctrl-names = "default";
+// 	status = "okay";
+// };
+
+zephyr_udc0: &usb {
+	pinctrl-0 = <&usb_dp_pa12 &usb_dm_pa11>;
+	pinctrl-names = "default";
+	// status = "okay";
+};
