@@ -1,0 +1,5 @@
+board:
+  name: coreboard_h503cb
+  vendor: weact
+  socs:
+    - name: stm32h503xx

@@ -1,0 +1,18 @@
+identifier: coreboard_h503cb
+name: WeAct Studio STM32H503Cx Core Board
+type: mcu
+arch: arm
+toolchain:
+  - zephyr
+  - gnuarmemb
+  - xtools
+supported:
+  - adc
+  - counter
+  - gpio
+  - i2c
+  - pwm
+  - spi
+  - uart
+  - usb_device
+vendor: weact
