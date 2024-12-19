@@ -1,0 +1,5 @@
+board:
+  name: fk743m5-xih6
+  vendor: others
+  socs:
+    - name: stm32h743xx
