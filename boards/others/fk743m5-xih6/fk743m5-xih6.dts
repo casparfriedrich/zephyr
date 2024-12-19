@@ -1,0 +1,202 @@
+/*
+ * Copyright (c) 2025 Caspar Friedrich <c.s.w.friedrich@gmail.com>
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/dts-v1/;
+
+#include <st/h7/stm32h743Xi.dtsi>
+#include <st/h7/stm32h743xihx-pinctrl.dtsi>
+
+/ {
+	model = "FK743M5-XIH6";
+	compatible = "others,fk743m5-xih6";
+
+	chosen {
+		zephyr,code-partition = &slot0_partition;
+		zephyr,console = &usart1;
+		zephyr,dtcm = &dtcm;
+		zephyr,flash = &flash0;
+		zephyr,shell-uart = &usart1;
+		zephyr,sram = &sram0;
+		zephyr,uart-mcumgr = &usart1;
+	};
+
+	gpio_leds {
+		compatible = "gpio-leds";
+
+		led: led {
+			gpios = <&gpioc 13 GPIO_ACTIVE_LOW>;
+		};
+	};
+
+	sdram1: sdram@c0000000 {
+		compatible = "zephyr,memory-region", "mmio-sram";
+		device_type = "memory";
+		reg = <0xc0000000 DT_SIZE_M(32)>;
+		zephyr,memory-region = "SDRAM1";
+	};
+
+	aliases {
+		led0 = &led;
+		mcuboot-led0 = &led;
+		spi-flash0 = &spi_flash0;
+		die-temp0 = &die_temp;
+	};
+};
+
+&clk_hse {
+	status = "okay";
+	clock-frequency = <DT_FREQ_M(25)>;
+};
+
+&clk_lse {
+	status = "okay";
+};
+
+&pll {
+	status = "okay";
+	clocks = <&clk_hse>;
+	div-m = <5>;
+	mul-n = <192>;
+	div-p = <2>; /* 480 MHz -> SYSCLK */
+	div-q = <8>; /* 120 MHz -> RNG, SDMMC1/2, SPI1/2/3 */
+	div-r = <2>; /* 480 MHz */
+};
+
+&pll3 {
+	status = "okay";
+	clocks = <&clk_hse>;
+	div-m = <5>;
+	mul-n = <192>;
+	div-p = <2>;  /* 480 MHz */
+	div-q = <20>; /*  48 MHz -> USB */
+	div-r = <2>;  /* 480 MHz */
+};
+
+&rcc {
+	status = "okay";
+	clocks = <&pll>;
+	clock-frequency = <DT_FREQ_M(480)>;
+	d1cpre  = <1>; /* 480 MHz -> CPU Clock, Systick */
+	hpre    = <2>; /* 240 MHz (HCLK3) -> QUADSPI */
+	d1ppre  = <2>; /* 120 MHz (PCLK3) */
+	d2ppre1 = <2>; /* 120 MHz (PCLK1) -> I2C1/2/3, USART1/3/4/5/7/8 */
+	d2ppre2 = <2>; /* 120 MHz (PCLK2) -> SPI4/5, USART1/6 */
+	d3ppre  = <2>; /* 120 MHz (PCLK4) */
+};
+
+&rng {
+	status = "okay";
+	clocks = <&rcc STM32_CLOCK_BUS_AHB2 0x00000040>,
+	         <&rcc STM32_SRC_PLL1_Q RNG_SEL(1)>;
+};
+
+&rtc {
+	status = "okay";
+	clocks = <&rcc STM32_CLOCK_BUS_APB4 0x00010000>,
+	         <&rcc STM32_SRC_LSE RTC_SEL(1)>;
+};
+
+&quadspi {
+	status = "okay";
+	pinctrl-0 = <&quadspi_bk1_io0_pf8 &quadspi_bk1_io1_pf9 &quadspi_bk1_io2_pf7
+	             &quadspi_bk1_io3_pf6 &quadspi_clk_pf10 &quadspi_bk1_ncs_pg6>;
+	pinctrl-names = "default";
+
+	spi_flash0: w25q64jv@0 {
+		compatible = "st,stm32-qspi-nor";
+		reg = <0x0>;
+		jedec-id = [ef 40 17];
+		size = <DT_SIZE_M(64)>;
+		qspi-max-frequency = <DT_FREQ_M(50)>;
+	};
+};
+
+&fmc {
+	status = "okay";
+	pinctrl-0 = <&fmc_nbl0_pe0 &fmc_nbl1_pe1
+		     &fmc_sdclk_pg8 &fmc_sdnwe_pc0 &fmc_sdcke0_ph2
+		     &fmc_sdne0_ph3 &fmc_sdnras_pf11 &fmc_sdncas_pg15
+		     &fmc_a0_pf0 &fmc_a1_pf1 &fmc_a2_pf2 &fmc_a3_pf3
+		     &fmc_a4_pf4 &fmc_a5_pf5 &fmc_a6_pf12 &fmc_a7_pf13
+		     &fmc_a8_pf14 &fmc_a9_pf15 &fmc_a10_pg0 &fmc_a11_pg1
+		     &fmc_a12_pg2 &fmc_a13_pg3 &fmc_a14_pg4 &fmc_a15_pg5
+		     &fmc_d0_pd14 &fmc_d1_pd15 &fmc_d2_pd0 &fmc_d3_pd1
+		     &fmc_d4_pe7 &fmc_d5_pe8 &fmc_d6_pe9 &fmc_d7_pe10
+		     &fmc_d8_pe11 &fmc_d9_pe12 &fmc_d10_pe13 &fmc_d11_pe14
+		     &fmc_d12_pe15 &fmc_d13_pd8 &fmc_d14_pd9 &fmc_d15_pd10>;
+	pinctrl-names = "default";
+
+	sdram {
+		status = "okay";
+		mode-register = <0>;
+		num-auto-refresh = <1>;
+		power-up-delay = <100>;
+		refresh-rate = <1386>;
+
+		bank@0 {
+			reg = <0>;
+			st,sdram-control = <STM32_FMC_SDRAM_NC_8
+					    STM32_FMC_SDRAM_NR_12
+					    STM32_FMC_SDRAM_MWID_16
+					    STM32_FMC_SDRAM_NB_4
+					    STM32_FMC_SDRAM_CAS_2
+					    STM32_FMC_SDRAM_SDCLK_PERIOD_3
+					    STM32_FMC_SDRAM_RBURST_DISABLE
+					    STM32_FMC_SDRAM_RPIPE_1>;
+			st,sdram-timing = <2 7 4 7 2 2 2>;
+		};
+	};
+};
+
+&usart1 {
+	status = "okay";
+	pinctrl-0 = <&usart1_tx_pa9 &usart1_rx_pa10>;
+	pinctrl-names = "default";
+	current-speed = <115200>;
+};
+
+&sdmmc1 {
+	pinctrl-0 = <&sdmmc1_d0_pc8 &sdmmc1_d1_pc9 &sdmmc1_d2_pc10
+	             &sdmmc1_d3_pc11 &sdmmc1_ck_pc12 &sdmmc1_cmd_pd2>;
+	pinctrl-names = "default";
+};
+
+zephyr_udc0: &usbotg_fs {
+	status = "okay";
+	pinctrl-0 = <&usb_otg_fs_dm_pa11 &usb_otg_fs_dp_pa12>;
+	pinctrl-names = "default";
+	clocks = <&rcc STM32_CLOCK_BUS_AHB1 0x08000000>,
+	         <&rcc STM32_SRC_PLL3_Q USB_SEL(2)>;
+};
+
+&flash0 {
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		boot_partition: partition@0 {
+			label = "mcuboot";
+			reg = <0x00000000 DT_SIZE_K(48)>;
+			read-only;
+		};
+
+		slot0_partition: partition@10000 {
+			label = "image-0";
+			reg = <0x00010000 DT_SIZE_K(992)>;
+		};
+
+		slot1_partition: partition@104000 {
+			label = "image-1";
+			reg = <0x00104000 DT_SIZE_K(992)>;
+		};
+
+		storage_partition: partition@1f8000 {
+			label = "storage";
+			reg = <0x001f8000 DT_SIZE_K(16)>;
+		};
+	};
+};
