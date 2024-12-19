@@ -1,0 +1,335 @@
+/*
+ * Copyright (c) 2025 Caspar Friedrich <c.s.w.friedrich@gmail.com>
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/dts-v1/;
+
+#include <st/h7/stm32h743Xi.dtsi>
+#include <st/h7/stm32h743xihx-pinctrl.dtsi>
+
+/ {
+	model = "FK743M5-XIH6";
+	compatible = "others,fk743m5-xih6";
+
+	chosen {
+		zephyr,code-partition = &slot0_partition;
+		zephyr,console = &lpuart1;
+		zephyr,dtcm = &dtcm;
+		zephyr,flash = &flash0;
+		zephyr,itcm = &itcm;
+		zephyr,shell-uart = &lpuart1;
+		zephyr,sram = &sram0;
+		zephyr,uart-mcumgr = &lpuart1;
+	};
+
+	gpio_leds {
+		compatible = "gpio-leds";
+
+		led0: led {
+			gpios = <&gpioc 13 GPIO_ACTIVE_LOW>;
+		};
+	};
+
+	sdram1: sdram@c0000000 {
+		compatible = "zephyr,memory-region", "mmio-sram";
+		device_type = "memory";
+		reg = <0xc0000000 DT_SIZE_M(32)>;
+		zephyr,memory-region = "SDRAM1";
+	};
+
+	spi_flash0: memory@90000000 {
+		compatible = "zephyr,memory-region";
+		reg = <0x90000000 DT_SIZE_M(8)>;
+		zephyr,memory-region = "EXTMEM";
+	};
+
+	aliases {
+		led0 = &led0;
+		spi-flash0 = &spi_flash0;
+	};
+};
+
+&clk_hse {
+	status = "okay";
+	clock-frequency = <DT_FREQ_M(25)>;
+};
+
+&clk_lse {
+	status = "okay";
+};
+
+&pll {
+	status = "okay";
+	clocks = <&clk_hse>;
+	div-m = <5>;
+	mul-n = <192>;
+	div-p = <2>; /* 480 MHz */
+	div-q = <4>; /* 240 MHz -> RNG/SDMMC1 */
+	div-r = <2>; /* 480 MHz */
+};
+
+&pll3 {
+	status = "okay";
+	clocks = <&clk_hse>;
+	div-m = <5>;
+	mul-n = <192>;
+	div-p = <2>;  /* 480 MHz */
+	div-q = <20>; /*  48 MHz -> USB */
+	div-r = <2>;  /* 480 MHz */
+};
+
+&rcc {
+	status = "okay";
+	clocks = <&pll>;
+	clock-frequency = <DT_FREQ_M(480)>;
+	d1cpre  = <1>; /* 480 MHz (CPU) */
+	hpre    = <2>; /* 240 MHz (HCLK3) -> FMC/QUADSPI */
+	d1ppre  = <2>; /* 120 MHz (PCLK3) -> LPUART1 */
+	d2ppre1 = <2>; /* 120 MHz (PCLK1) */
+	d2ppre2 = <2>; /* 120 MHz (PCLK2) -> SPI5 */
+	d3ppre  = <2>; /* 120 MHz (PCLK4) */
+};
+
+&rng {
+	status = "okay";
+	clocks = <&rcc STM32_CLOCK(AHB2, 6U)>,
+	         <&rcc STM32_SRC_PLL1_Q RNG_SEL(1)>;
+};
+
+&rtc {
+	status = "okay";
+	clocks = <&rcc STM32_CLOCK(APB4, 16U)>,
+	         <&rcc STM32_SRC_LSE RTC_SEL(1)>;
+};
+
+&lpuart1 {
+	status = "okay";
+	pinctrl-0 = <&lpuart1_tx_pa9
+	             &lpuart1_rx_pa10>;
+	pinctrl-names = "default";
+	current-speed = <115200>;
+};
+
+&fmc {
+	status = "okay";
+	pinctrl-0 = <&fmc_a0_pf0
+	             &fmc_a1_pf1
+	             &fmc_a2_pf2
+	             &fmc_a3_pf3
+	             &fmc_a4_pf4
+	             &fmc_a5_pf5
+	             &fmc_a6_pf12
+	             &fmc_a7_pf13
+	             &fmc_a8_pf14
+	             &fmc_a9_pf15
+	             &fmc_a10_pg0
+	             &fmc_a11_pg1
+	             &fmc_a12_pg2
+	             &fmc_a14_pg4
+	             &fmc_a15_pg5
+	             &fmc_d0_pd14
+	             &fmc_d1_pd15
+	             &fmc_d2_pd0
+	             &fmc_d3_pd1
+	             &fmc_d4_pe7
+	             &fmc_d5_pe8
+	             &fmc_d6_pe9
+	             &fmc_d7_pe10
+	             &fmc_d8_pe11
+	             &fmc_d9_pe12
+	             &fmc_d10_pe13
+	             &fmc_d11_pe14
+	             &fmc_d12_pe15
+	             &fmc_d13_pd8
+	             &fmc_d14_pd9
+	             &fmc_d15_pd10
+	             &fmc_nbl0_pe0
+	             &fmc_nbl1_pe1
+	             &fmc_sdcke0_ph2
+	             &fmc_sdclk_pg8
+	             &fmc_sdncas_pg15
+	             &fmc_sdne0_ph3
+	             &fmc_sdnras_pf11
+	             &fmc_sdnwe_pc0>;
+	pinctrl-names = "default";
+
+	sdram {
+		status = "okay";
+		power-up-delay = <100>;
+		num-auto-refresh = <8>;
+		mode-register = <0x220>;
+		refresh-rate = <603>;
+
+		bank@0 {
+			reg = <0>;
+			st,sdram-control = <STM32_FMC_SDRAM_NC_9
+			                    STM32_FMC_SDRAM_NR_13
+			                    STM32_FMC_SDRAM_MWID_16
+			                    STM32_FMC_SDRAM_NB_4
+			                    STM32_FMC_SDRAM_CAS_2
+			                    STM32_FMC_SDRAM_SDCLK_PERIOD_2
+			                    STM32_FMC_SDRAM_RBURST_ENABLE
+			                    STM32_FMC_SDRAM_RPIPE_0>;
+			st,sdram-timing = <2 6 4 6 2 2 2>;
+		};
+	};
+};
+
+&quadspi {
+	status = "okay";
+	pinctrl-0 = <&quadspi_bk1_io0_pf8
+	             &quadspi_bk1_io1_pf9
+	             &quadspi_bk1_io2_pf7
+	             &quadspi_bk1_io3_pf6
+	             &quadspi_bk1_ncs_pg6
+	             &quadspi_clk_pf10>;
+	pinctrl-names = "default";
+
+	w25q64jv@0 {
+		compatible = "st,stm32-qspi-nor";
+		reg = <0>;
+		size = <DT_SIZE_M(64)>;
+		qspi-max-frequency = <DT_FREQ_M(50)>;
+	};
+};
+
+&sdmmc1 {
+	status = "disabled";
+	pinctrl-0 = <&sdmmc1_d0_pc8
+	             &sdmmc1_d1_pc9
+	             &sdmmc1_d2_pc10
+	             &sdmmc1_d3_pc11
+	             &sdmmc1_ck_pc12
+	             &sdmmc1_cmd_pd2>;
+	pinctrl-names = "default";
+};
+
+/*
+ * LCD1 (LCD connector)
+ *
+ * Additional signals:
+ *     - LCD_BL_PH6
+ *     - LCD_DC_PJ11
+ */
+&spi5 {
+	status = "disabled";
+	/*
+	 * transmit only
+	 */
+	pinctrl-0 = <&spi5_mosi_pj10
+	             &spi5_sck_pk0
+	             &spi5_nss_ph5>;
+	pinctrl-names = "default";
+};
+
+/*
+ * CAMERA1 (CAMERA connector)
+ *
+ * Additional signals:
+ *     - CAMERA_PWDN_PH13
+ *     - SCCB_SCL_PI8
+ *     - SCCB_SDA_PI9
+ */
+&dcmi {
+	status = "disabled";
+	pinctrl-0 = <&dcmi_d0_ph9
+	             &dcmi_d1_ph10
+	             &dcmi_d2_ph11
+	             &dcmi_d3_ph12
+	             &dcmi_d4_ph14
+	             &dcmi_d5_pi4
+	             &dcmi_d6_pi6
+	             &dcmi_d7_pi7
+	             &dcmi_pixclk_pa6
+	             &dcmi_hsync_ph8
+	             &dcmi_vsync_pi5>;
+	pinctrl-names = "default";
+};
+
+/*
+ * LCD2 (RGB connector)
+ *
+ * Additional signals:
+ *     - TOUCH_INT_PI11
+ *     - TOUCH_RST_PI10
+ *     - TOUCH_SCLK_PG3
+ *     - TOUCH_SDA_PG7
+ */
+&ltdc {
+	status = "disabled";
+	pinctrl-0 = <&ltdc_b0_pj12
+	             &ltdc_b1_pj13
+	             &ltdc_b2_pj14
+	             &ltdc_b3_pj15
+	             &ltdc_b4_pk3
+	             &ltdc_b5_pk4
+	             &ltdc_b6_pk5
+	             &ltdc_b7_pk6
+	             &ltdc_g0_pj7
+	             &ltdc_g1_pj8
+	             &ltdc_g2_pj9
+	             &ltdc_g3_pg10
+	             &ltdc_g4_ph15
+	             &ltdc_g5_ph4
+	             &ltdc_g6_pk1
+	             &ltdc_g7_pk2
+	             &ltdc_r0_pi15
+	             &ltdc_r1_pj0
+	             &ltdc_r2_pj1
+	             &ltdc_r3_pj2
+	             &ltdc_r4_pj3
+	             &ltdc_r5_pj4
+	             &ltdc_r6_pj5
+	             &ltdc_r7_pj6
+	             &ltdc_de_pk7
+	             &ltdc_clk_pi14
+	             &ltdc_hsync_pi12
+	             &ltdc_vsync_pi13>;
+	pinctrl-names = "default";
+	ext-sdram = <&sdram1>;
+
+	/*
+	 * Configure the GPIO polarity according to LCD datasheet.
+	 */
+	bl-ctrl-gpios = <&gpioh 6 GPIO_ACTIVE_HIGH>;
+};
+
+zephyr_udc0: &usbotg_fs {
+	status = "okay";
+	pinctrl-0 = <&usb_otg_fs_dm_pa11
+	             &usb_otg_fs_dp_pa12>;
+	pinctrl-names = "default";
+	clocks = <&rcc STM32_CLOCK(AHB1, 27U)>,
+	         <&rcc STM32_SRC_PLL3_Q USB_SEL(2)>;
+};
+
+&flash0 {
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		boot_partition: partition@0 {
+			label = "mcuboot";
+			reg = <0x00000000 DT_SIZE_K(64)>;
+			read-only;
+		};
+
+		slot0_partition: partition@10000 {
+			label = "image-0";
+			reg = <0x00010000 DT_SIZE_K(960)>;
+		};
+
+		slot1_partition: partition@100000 {
+			label = "image-1";
+			reg = <0x00100000 DT_SIZE_K(960)>;
+		};
+
+		storage_partition: partition@1f0000 {
+			label = "storage";
+			reg = <0x001f0000 DT_SIZE_K(64)>;
+		};
+	};
+};
