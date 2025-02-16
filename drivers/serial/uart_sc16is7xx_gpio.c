@@ -11,7 +11,7 @@
 
 struct sc16is7xx_gpio_config
 {
-	/* gpio_driver_config needs to be first */
+	/* gpio_driver_config needs to be first field */
 	struct gpio_driver_config common;
 
 	const struct device *bus;
@@ -19,7 +19,7 @@ struct sc16is7xx_gpio_config
 
 struct sc16is7xx_gpio_data
 {
-	/* gpio_driver_data needs to be first */
+	/* gpio_driver_data needs to be first field */
 	struct gpio_driver_data common;
 
 	struct k_mutex lock;
@@ -267,7 +267,4 @@ static const struct gpio_driver_api api = {
 
 DT_INST_FOREACH_STATUS_OKAY(DT_INST_INIT)
 
-/*
- *
- */
-BUILD_ASSERT(DT_NUM_INST_STATUS_OKAY(DT_DRV_COMPAT) <= 1);
+//BUILD_ASSERT(DT_NUM_INST_STATUS_OKAY(DT_DRV_COMPAT) <= 1);

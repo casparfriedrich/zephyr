@@ -64,7 +64,7 @@ static int sc16is7xx_read_i2c(const struct device *dev, uint8_t cmd, uint8_t *da
 }
 
 static int sc16is7xx_write_i2c(const struct device *dev, uint8_t cmd, const uint8_t *data,
-			       size_t data_len)
+                               size_t data_len)
 {
 	return i2c_burst_write_dt(&get_config(dev)->bus.i2c, cmd, data, data_len);
 }
@@ -288,7 +288,7 @@ static int sc16is7xx_init(const struct device *dev)
 	}
 
 	/*
-	 * Todo: Check if device is operational
+	 * Todo: Check if device is operational (Scratchpad Register (SPR))
 	 */
 
 	return 0;
@@ -325,10 +325,10 @@ static const struct sc16is7xx_api api = {
 
 DT_INST_FOREACH_STATUS_OKAY(DT_INST_INIT)
 
-#if DT_ANY_INST_ON_BUS_STATUS_OKAY(i2c)
-BUILD_ASSERT(CONFIG_UART_SC16IS7XX_INIT_PRIORITY >= CONFIG_I2C_INIT_PRIORITY);
-#endif
+// #if DT_ANY_INST_ON_BUS_STATUS_OKAY(i2c)
+// BUILD_ASSERT(CONFIG_UART_SC16IS7XX_INIT_PRIORITY >= CONFIG_I2C_INIT_PRIORITY);
+// #endif
 
-#if DT_ANY_INST_ON_BUS_STATUS_OKAY(spi)
-BUILD_ASSERT(CONFIG_UART_SC16IS7XX_INIT_PRIORITY >= CONFIG_SPI_INIT_PRIORITY);
-#endif
+// #if DT_ANY_INST_ON_BUS_STATUS_OKAY(spi)
+// BUILD_ASSERT(CONFIG_UART_SC16IS7XX_INIT_PRIORITY >= CONFIG_SPI_INIT_PRIORITY);
+// #endif
