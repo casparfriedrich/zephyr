@@ -1,0 +1,45 @@
+/ {
+	chosen {
+		// zephyr,console = &sc16is7xx_ch0;
+		// zephyr,shell-uart = &sc16is7xx_ch0;
+	};
+};
+
+&spi1 {
+	status = "okay";
+	pinctrl-0 = <&spi2_mosi_pb15
+	             &spi2_miso_pb14
+	             &spi2_sck_pb13
+	             &spi2_nss_pb12>;
+	pinctrl-names = "default";
+
+	sc16is752@0 {
+		compatible = "nxp,sc16is7xx";
+		reg = <0x0>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		clock-frequency = <1843200>;
+		spi-max-frequency = <DT_FREQ_M(4)>;
+		irq-gpios = <&gpioa 11 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+		reset-gpios = <&gpioa 12 GPIO_ACTIVE_LOW>;
+
+		sc16is7xx_ch0: sc16is752_uart@0 {
+			compatible = "nxp,sc16is7xx-uart";
+			reg = <0x0>;
+			// flow-control = "rtscts";
+		};
+
+		sc16is7xx_ch1: sc16is752_uart@1 {
+			compatible = "nxp,sc16is7xx-uart";
+			reg = <0x1>;
+			// flow-control = "rtscts";
+		};
+
+		// sc16is7xx_gpio: sc16is752_gpio {
+		// 	compatible = "nxp,sc16is7xx-gpio";
+		// 	gpio-controller;
+		// 	ngpios = <8>;
+		// 	#gpio-cells = <2>;
+		// };
+	};
+};
