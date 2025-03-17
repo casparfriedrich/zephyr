@@ -1,0 +1,6 @@
+description: |
+  NXP SC16IS7XX, I2C/SPI to UART interface (spi parent node)
+
+compatible: "nxp,sc16is7xx"
+
+include: ["spi-device.yaml", "nxp,sc16is7xx-common.yaml"]

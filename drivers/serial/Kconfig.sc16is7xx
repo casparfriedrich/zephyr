@@ -1,0 +1,31 @@
+# Copyright (c) 2024, Caspar Friedrich <c.s.w.friedrich@gmail.com>
+# SPDX-License-Identifier: Apache-2.0
+
+DT_COMPAT_NXP_SC16IS7XX := nxp,sc16is7xx
+DT_COMPAT_NXP_SC16IS7XX_UART := nxp,sc16is7xx-uart
+DT_COMPAT_NXP_SC16IS7XX_GPIO := nxp,sc16is7xx-gpio
+
+menuconfig UART_SC16IS7XX
+	bool "NXP SC16IS7XX I2C/SPI to UART bridge"
+	default $(dt_compat_enabled,$(DT_COMPAT_NXP_SC16IS7XX))
+	select GPIO
+	select I2C if $(dt_compat_on_bus,$(DT_COMPAT_NXP_SC16IS7XX),i2c)
+	select SPI if $(dt_compat_on_bus,$(DT_COMPAT_NXP_SC16IS7XX),spi)
+	select SERIAL_HAS_DRIVER
+	select SERIAL_SUPPORT_INTERRUPT
+
+if UART_SC16IS7XX
+
+config UART_SC16IS7XX_INIT_PRIORITY
+	int "SC16IS7XX driver initialization priority"
+	default KERNEL_INIT_PRIORITY_DEVICE
+
+config UART_SC16IS7XX_UART
+	bool "Enable UART channels"
+	default $(dt_compat_enabled,$(DT_COMPAT_NXP_SC16IS7XX_UART))
+
+config UART_SC16IS7XX_GPIO
+	bool "Enable extra GPIOs"
+	default $(dt_compat_enabled,$(DT_COMPAT_NXP_SC16IS7XX_GPIO))
+
+endif # UART_SC16IS7XX
