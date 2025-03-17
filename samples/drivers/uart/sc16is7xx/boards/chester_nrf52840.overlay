@@ -1,0 +1,19 @@
+&i2c0 {
+	zephyr,concat-buf-size = <68>;
+
+	sc16is740@50 {
+		compatible = "nxp,sc16is7xx";
+		reg = <0x50>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		clock-frequency = <14700000>;
+		irq-gpios = <&gpio0 2 GPIO_ACTIVE_LOW>;
+
+		sc16is7xx_ch0: sc16is740_channel@0 {
+			compatible = "nxp,sc16is7xx-channel";
+			reg = <0x0>;
+			current-speed = <9600>;
+			flow-control = "rs485";
+		};
+	};
+};

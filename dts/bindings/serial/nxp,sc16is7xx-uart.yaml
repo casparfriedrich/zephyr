@@ -1,0 +1,14 @@
+description: |
+  NXP SC16IS7XX, I2C/SPI to UART interface (channel control node)
+  There can be two nodes, the first one (@0) controls channel A and the
+  second one (@1) channel B.
+
+compatible: "nxp,sc16is7xx-uart"
+
+include: [uart-controller.yaml]
+
+on-bus: sc16is7xx
+
+properties:
+  reg:
+    required: true
