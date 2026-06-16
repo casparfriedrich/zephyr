@@ -1,0 +1,6 @@
+# Copyright (c) 2026 Caspar Friedrich <c.s.w.friedrich@gmail.com>
+# SPDX-License-Identifier: Apache-2.0
+
+if BOARD_STM32H743IIT6_CB_V1_5
+
+endif # BOARD_STM32H743IIT6_CB_V1_5

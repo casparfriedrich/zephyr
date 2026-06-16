@@ -1,0 +1,6 @@
+board:
+  name: stm32h743iit6_cb_v1_5
+  full_name: STM32H743IIT6 CB V1.5
+  vendor: Dongguan Huiqin Zhiyuan Technology Co., Ltd.
+  socs:
+    - name: stm32h743xx
