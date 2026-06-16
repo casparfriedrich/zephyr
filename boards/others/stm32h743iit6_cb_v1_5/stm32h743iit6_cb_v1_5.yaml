@@ -1,0 +1,19 @@
+identifier: stm32h743iit6_cb_v1_5
+name: STM32H743IIT6 CB V1.5
+type: mcu
+arch: arm
+toolchain:
+  - zephyr
+  - gnuarmemb
+ram: 1024
+flash: 2048
+supported:
+  - uart
+  - gpio
+  - counter
+  - i2c
+  - pwm
+  - adc
+  - spi
+  - usb_device
+  - can
